@@ -1,0 +1,4 @@
+BUILTIN(mozartVMPutPixel, "vUiUiUi", "nc")
+BUILTIN(mozartVMFlush, "v", "nc")
+
+#undef BUILTIN
