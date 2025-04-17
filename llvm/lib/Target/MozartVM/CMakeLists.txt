@@ -9,6 +9,7 @@ tablegen(LLVM MozartVMGenMCPseudoLowering.inc -gen-pseudo-lowering)
 tablegen(LLVM MozartVMGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM MozartVMGenCallingConv.inc -gen-callingconv)
 tablegen(LLVM MozartVMGenAsmWriter.inc -gen-asm-writer)
+tablegen(LLVM MozartVMGenMCCodeEmitter.inc -gen-emitter)
 
 add_public_tablegen_target(MozartVMCommonTableGen)
 

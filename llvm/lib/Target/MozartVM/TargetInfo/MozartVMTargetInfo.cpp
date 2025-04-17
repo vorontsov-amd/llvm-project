@@ -13,5 +13,5 @@ Target &llvm::getTheMozartVMTarget() {
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeMozartVMTargetInfo() {
   // MOZARTVM_DUMP_YELLOW
   RegisterTarget<Triple::mozartVM> X(getTheMozartVMTarget(), "mozartVM",
-                                "Simulator target for LLVM course", "MOZARTVM");
+                                "MozartVM target for LLVM course", "MOZARTVM");
 }

@@ -76,4 +76,8 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeMozartVMTargetMC() {
 
   // Register the MCInstPrinter
   TargetRegistry::RegisterMCInstPrinter(TheMozartVMTarget, createMozartVMMCInstPrinter);
+  // Register the MC Code Emitter.
+  TargetRegistry::RegisterMCCodeEmitter(TheMozartVMTarget, createMozartVMMCCodeEmitter);
+  // Register the asm backend.
+  TargetRegistry::RegisterMCAsmBackend(TheMozartVMTarget, createMozartVMAsmBackend);
 }
