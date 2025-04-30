@@ -65,7 +65,16 @@ bool llvm::LowerMozartVMMachineOperandToMCOperand(const MachineOperand &MO,
   case MachineOperand::MO_JumpTableIndex:
     MCOp = lowerSymbolOperand(MO, AP.GetJTISymbol(MO.getIndex()), AP);
     break;
+  case MachineOperand::MO_Immediate: {
+      if (MI.getOpcode() == MozartVM::LOAD_SRC) {
+          // Форматируем 16-битное значение
+          MCOp = MCOperand::createImm(MO.getImm() & 0xFFFF);
+          break;
+      }
+   
   }
+  }
+
   return true;
 }
 

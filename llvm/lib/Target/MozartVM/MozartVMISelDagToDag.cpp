@@ -108,6 +108,80 @@ void MozartVMDAGToDAGISel::Select(SDNode *Node) {
     CurDAG->RemoveDeadNode(Node);
     return;
   }
+
+  case MozartVMISD::HI: {
+      // MOVHI для старших бит
+      SDValue Addr = Node->getOperand(0);
+      ReplaceNode(Node, CurDAG->getMachineNode(MozartVM::MOVHI, SDLoc(Node), 
+                                              MVT::i32, Addr));
+      return;
+  }
+  case MozartVMISD::LO: {
+      // MOVLI/ORI для младших бит
+      SDValue Addr = Node->getOperand(0);
+      ReplaceNode(Node, CurDAG->getMachineNode(MozartVM::MOVLI, SDLoc(Node),
+                                              MVT::i32, Addr));
+      return;
+  }
+
+  case ISD::OR: {
+    // Handle ORI pattern
+    if (Node->getOperand(0).getOpcode() == MozartVMISD::HI && 
+        Node->getOperand(1).getOpcode() == MozartVMISD::LO) {
+      SDValue Hi = Node->getOperand(0).getOperand(0);
+      SDValue Lo = Node->getOperand(1).getOperand(0);
+      
+      SDNode *MOVHI = CurDAG->getMachineNode(MozartVM::MOVHI, SDLoc(Node), 
+                                            MVT::i32, Hi);
+      SDNode *ORI = CurDAG->getMachineNode(MozartVM::ORI, SDLoc(Node), MVT::i32,
+                                          SDValue(MOVHI, 0), Lo);
+      ReplaceNode(Node, ORI);
+      return;
+    }
+    break;
+  }
+
+  case MozartVMISD::CALL_ALLOC: {
+    SDValue Addr1 = Node->getOperand(0);
+    SDValue Addr2 = Node->getOperand(1);
+    
+    // Генерируем MOVHI + MOVLI для каждого адреса
+    SDNode *MOVHI1 = CurDAG->getMachineNode(MozartVM::MOVHI, SDLoc(Node), 
+                                          MVT::i32, Addr1);
+    SDNode *MOVLI1 = CurDAG->getMachineNode(MozartVM::MOVLI, SDLoc(Node), 
+                                          MVT::i32, Addr1);
+    SDNode *ORI1 = CurDAG->getMachineNode(MozartVM::ORI, SDLoc(Node), MVT::i32,
+                                        SDValue(MOVHI1, 0), SDValue(MOVLI1, 0));
+
+    SDNode *MOVHI2 = CurDAG->getMachineNode(MozartVM::MOVHI, SDLoc(Node), 
+                                          MVT::i32, Addr2);
+    SDNode *MOVLI2 = CurDAG->getMachineNode(MozartVM::MOVLI, SDLoc(Node), 
+                                          MVT::i32, Addr2);
+    SDNode *ORI2 = CurDAG->getMachineNode(MozartVM::ORI, SDLoc(Node), MVT::i32,
+                                        SDValue(MOVHI2, 0), SDValue(MOVLI2, 0));
+
+    // Комбинируем результаты
+    ReplaceNode(Node, CurDAG->getMachineNode(MozartVM::ADD, SDLoc(Node), 
+                                           MVT::i32, SDValue(ORI1, 0), 
+                                           SDValue(ORI2, 0)));
+    return;
+  }
+
+  case MozartVMISD::SRC_VALUE: {
+    // Получаем 16-битное непосредственное значение
+    uint64_t Val = cast<ConstantSDNode>(Node->getOperand(0))->getZExtValue();
+    SDValue Imm = CurDAG->getTargetConstant(Val, SDLoc(Node), MVT::i32);
+    
+    // Генерируем MOVLI + специальную загрузку
+    SDNode *MOVLI = CurDAG->getMachineNode(MozartVM::MOVLI, SDLoc(Node),
+                                         MVT::i32, Imm);
+    SDNode *LOAD = CurDAG->getMachineNode(MozartVM::LOAD_SRC, SDLoc(Node),
+                                        MVT::i32, SDValue(MOVLI, 0));
+    
+    ReplaceNode(Node, LOAD);
+    return;
+  }
+
   }
   SelectCode(Node);
 }
