@@ -18,6 +18,8 @@ enum NodeType : unsigned {
   RET,
   CALL,
   BR_CC,
+  INC_EQi,
+  INC_NEi,
 };
 
 } // namespace MozartVMISD
@@ -63,6 +65,10 @@ private:
                       bool IsVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &ArgsFlags,
                       LLVMContext &Context, const Type *RetTy) const override;
+  /// Provide custom lowering hooks for some operations.
+  SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
+  SDValue lowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
+  unsigned getIsdOpIncCmp(ISD::CondCode CCVal) const;
 };
 
 } // end namespace llvm

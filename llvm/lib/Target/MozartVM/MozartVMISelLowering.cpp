@@ -69,6 +69,12 @@ const char *MozartVMTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "MozartVMISD::CALL";
   case MozartVMISD::RET:
     return "MozartVMISD::RET";
+  case MozartVMISD::BR_CC:
+    return "MozartVMISD::BR_CC";
+  case MozartVMISD::INC_EQi:
+    return "MozartVMISD::INC_EQi";
+  case MozartVMISD::INC_NEi:
+    return "MozartVMISD::INC_NEi";
   }
   return nullptr;
 }
@@ -605,4 +611,48 @@ bool MozartVMTargetLowering::isLegalAddressingMode(const DataLayout &DL,
   }
 
   return true;
+}
+
+unsigned MozartVMTargetLowering::getIsdOpIncCmp(ISD::CondCode CCVal) const {
+  switch (CCVal) {
+  default:
+    llvm_unreachable("CCVal for INC not implemented");
+  case ISD::CondCode::SETEQ:
+    return MozartVMISD::INC_EQi;
+  case ISD::CondCode::SETNE:
+    return MozartVMISD::INC_NEi;
+  }
+}
+
+SDValue MozartVMTargetLowering::lowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
+  // t26: ch = br_cc t22, seteq:ch, t10, Constant:i32<512>,
+  // BasicBlock:ch<for.cond.cleanup7>
+  SDValue CC = Op.getOperand(1);
+  SDValue ADD = Op.getOperand(2);
+  ISD::CondCode CCVal = cast<CondCodeSDNode>(CC)->get();
+  if (ADD->getOpcode() == ISD::ADD) {
+    SDValue INC = ADD->getOperand(1);
+    if (INC->getOpcode() == ISD::Constant &&
+        cast<ConstantSDNode>(INC)->getZExtValue() == 1) {
+      SDValue CMP = Op.getOperand(3);
+      SDValue INCCMP = DAG.getNode(getIsdOpIncCmp(CCVal), ADD,
+                                   DAG.getVTList({MVT::i32, MVT::i32}),
+                                   ADD->getOperand(0), CMP);
+      DAG.ReplaceAllUsesWith(ADD, INCCMP.getValue(1));
+      DAG.RemoveDeadNode(ADD.getNode());
+      SDValue Block = Op->getOperand(4);
+      return DAG.getNode(MozartVMISD::BR_CC, Op, Op.getValueType(), Op.getOperand(0),
+                         INCCMP.getValue(0), Block);
+    }
+  }
+  return Op;
+}
+
+SDValue MozartVMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
+  switch (Op->getOpcode()) {
+  case ISD::BR_CC:
+    return lowerBR_CC(Op, DAG);
+  default:
+    llvm_unreachable("");
+  }
 }

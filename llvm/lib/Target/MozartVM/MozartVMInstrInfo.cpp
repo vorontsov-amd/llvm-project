@@ -15,3 +15,17 @@ using namespace llvm;
 #define DEBUG_TYPE "MozartVM-inst-info"
 
 MozartVMInstrInfo::MozartVMInstrInfo() : MozartVMGenInstrInfo() { MOZARTVM_DUMP_GREEN }
+
+void MozartVMInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
+                               MachineBasicBlock::iterator MBBI,
+                               const DebugLoc &DL, MCRegister DstReg,
+                               MCRegister SrcReg, bool KillSrc,
+                               bool RenamableDest, bool RenamableSrc) const {
+  if (MozartVM::GPRRegClass.contains(DstReg, SrcReg)) {
+    BuildMI(MBB, MBBI, DL, get(MozartVM::ORI), DstReg)
+        .addReg(SrcReg, getKillRegState(KillSrc))
+        .addImm(0);
+    return;
+  }
+  llvm_unreachable("can't copyPhysReg");
+}
