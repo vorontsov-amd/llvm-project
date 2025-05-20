@@ -41,6 +41,9 @@ public:
     return SelectionDAGISel::runOnMachineFunction(MF);
   }
 
+  bool SelectBaseAddr(SDValue Addr, SDValue &Base);
+  bool SelectAddrFI(SDValue Addr, SDValue &Base);
+
   void Select(SDNode *N) override;
   unsigned getOpIncCmp(unsigned Opcode) const;
 
@@ -82,12 +85,28 @@ unsigned MozartVMDAGToDAGISel::getOpIncCmp(unsigned Opcode) const {
   }
 }
 
+bool MozartVMDAGToDAGISel::SelectBaseAddr(SDValue Addr, SDValue &Base) {
+  if (auto *FIN = dyn_cast<FrameIndexSDNode>(Addr))
+    Base = CurDAG->getTargetFrameIndex(FIN->getIndex(), MVT::i32);
+  else
+    Base = Addr;
+  return true;
+}
+
+bool MozartVMDAGToDAGISel::SelectAddrFI(SDValue Addr, SDValue &Base) {
+  if (auto *FIN = dyn_cast<FrameIndexSDNode>(Addr)) {
+    Base = CurDAG->getTargetFrameIndex(FIN->getIndex(), MVT::i32);
+    return true;
+  }
+  return false;
+}
+
 void MozartVMDAGToDAGISel::Select(SDNode *Node) {
   MOZARTVM_DUMP_RED
-  if (Node->isMachineOpcode()) {
-    Node->setNodeId(-1);
-    return;
-  }
+  // if (Node->isMachineOpcode()) {
+  //   Node->setNodeId(-1);
+  //   return;
+  // }
 
   unsigned Opcode = Node->getOpcode();
   SDLoc DL(Node);
@@ -95,6 +114,19 @@ void MozartVMDAGToDAGISel::Select(SDNode *Node) {
   switch (Opcode) {
   default:
     break;
+  case ISD::FrameIndex: {
+    int FI = cast<FrameIndexSDNode>(Node)->getIndex();
+    SDValue TFI = CurDAG->getTargetFrameIndex(FI, MVT::i32);
+    ReplaceNode(Node, CurDAG->getMachineNode(MozartVM::ADD, DL, MVT::i32, TFI,
+                                            CurDAG->getTargetConstant(0, DL, MVT::i32)));
+    return;
+  }
+  case MozartVMISD::GlobalAddress: {
+    SDValue Addr = Node->getOperand(0);
+    ReplaceNode(Node, CurDAG->getMachineNode(MozartVM::ADD, DL, MVT::i32, Addr,
+                                            CurDAG->getTargetConstant(0, DL, MVT::i32)));
+    return;
+  }
   case MozartVMISD::INC_EQi:
   case MozartVMISD::INC_NEi: {
     SDNode *INCCMP = CurDAG->getMachineNode(

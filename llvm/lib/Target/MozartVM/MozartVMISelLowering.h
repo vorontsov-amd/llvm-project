@@ -20,6 +20,7 @@ enum NodeType : unsigned {
   BR_CC,
   INC_EQi,
   INC_NEi,
+  GlobalAddress
 };
 
 } // namespace MozartVMISD
@@ -66,6 +67,7 @@ private:
                       const SmallVectorImpl<ISD::OutputArg> &ArgsFlags,
                       LLVMContext &Context, const Type *RetTy) const override;
   /// Provide custom lowering hooks for some operations.
+  SDValue LowerGlobalAddress(SDValue OP, SelectionDAG &DAG) const;
   SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
   SDValue lowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
   unsigned getIsdOpIncCmp(ISD::CondCode CCVal) const;

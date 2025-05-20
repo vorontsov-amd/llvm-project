@@ -49,6 +49,7 @@ MozartVMTargetLowering::MozartVMTargetLowering(const TargetMachine &TM,
     setOperationAction(Opc, MVT::i32, Expand);
 
   setOperationAction(ISD::ADD, MVT::i32, Legal);
+  setOperationAction(ISD::SUB, MVT::i32, Legal);
   setOperationAction(ISD::MUL, MVT::i32, Legal);
   // ...
   setOperationAction(ISD::LOAD, MVT::i32, Legal);
@@ -60,6 +61,14 @@ MozartVMTargetLowering::MozartVMTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::BR_CC, MVT::i32, Custom);
 
   setOperationAction(ISD::FRAMEADDR, MVT::i32, Legal);
+
+  setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
+
+  setOperationAction(ISD::SRL, MVT::i32, Legal);
+  setOperationAction(ISD::SRA, MVT::i32, Legal);
+  setOperationAction(ISD::SHL, MVT::i32, Legal);
+
+  setOperationAction(ISD::XOR, MVT::i32, Legal);
 }
 
 const char *MozartVMTargetLowering::getTargetNodeName(unsigned Opcode) const {
@@ -75,6 +84,8 @@ const char *MozartVMTargetLowering::getTargetNodeName(unsigned Opcode) const {
     return "MozartVMISD::INC_EQi";
   case MozartVMISD::INC_NEi:
     return "MozartVMISD::INC_NEi";
+  case MozartVMISD::GlobalAddress:
+    return "Arch52ISD::GlobalAddress";
   }
   return nullptr;
 }
@@ -573,6 +584,23 @@ MozartVMTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
 }
 
 //===----------------------------------------------------------------------===//
+//  Global Address Implementation
+//===----------------------------------------------------------------------===//
+
+SDValue MozartVMTargetLowering::LowerGlobalAddress(SDValue Op,
+                                                 SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
+  int64_t Offset = cast<GlobalAddressSDNode>(Op)->getOffset();
+
+  // Create the TargetGlobalAddress node, folding in the constant offset.
+  SDValue Result = DAG.getTargetGlobalAddress(
+      GV, DL, getPointerTy(DAG.getDataLayout()), Offset);
+  return DAG.getNode(MozartVMISD::GlobalAddress, DL,
+                     getPointerTy(DAG.getDataLayout()), Result);
+}
+
+//===----------------------------------------------------------------------===//
 // Target Optimization Hooks
 //===----------------------------------------------------------------------===//
 
@@ -624,32 +652,41 @@ unsigned MozartVMTargetLowering::getIsdOpIncCmp(ISD::CondCode CCVal) const {
   }
 }
 
-SDValue MozartVMTargetLowering::lowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
-  // t26: ch = br_cc t22, seteq:ch, t10, Constant:i32<512>,
-  // BasicBlock:ch<for.cond.cleanup7>
-  SDValue CC = Op.getOperand(1);
-  SDValue ADD = Op.getOperand(2);
-  ISD::CondCode CCVal = cast<CondCodeSDNode>(CC)->get();
-  if (ADD->getOpcode() == ISD::ADD) {
-    SDValue INC = ADD->getOperand(1);
-    if (INC->getOpcode() == ISD::Constant &&
-        cast<ConstantSDNode>(INC)->getZExtValue() == 1) {
-      SDValue CMP = Op.getOperand(3);
-      SDValue INCCMP = DAG.getNode(getIsdOpIncCmp(CCVal), ADD,
-                                   DAG.getVTList({MVT::i32, MVT::i32}),
-                                   ADD->getOperand(0), CMP);
-      DAG.ReplaceAllUsesWith(ADD, INCCMP.getValue(1));
-      DAG.RemoveDeadNode(ADD.getNode());
-      SDValue Block = Op->getOperand(4);
-      return DAG.getNode(MozartVMISD::BR_CC, Op, Op.getValueType(), Op.getOperand(0),
-                         INCCMP.getValue(0), Block);
-    }
+static void translateSetCCForBranch(const SDLoc &DL, SDValue &LHS, SDValue &RHS,
+                                    ISD::CondCode &CC, SelectionDAG &DAG) {
+  switch (CC) {
+  default:
+    break;
+  case ISD::SETLT:
+  case ISD::SETGE:
+    CC = ISD::getSetCCSwappedOperands(CC);
+    std::swap(LHS, RHS);
+    break;
   }
-  return Op;
 }
+
+SDValue MozartVMTargetLowering::lowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
+  SDValue CC = Op.getOperand(1);
+  SDValue LHS = Op.getOperand(2);
+  SDValue RHS = Op.getOperand(3);
+  SDValue Block = Op->getOperand(4);
+  SDLoc DL(Op);
+
+  assert(LHS.getValueType() == MVT::i32);
+
+  ISD::CondCode CCVal = cast<CondCodeSDNode>(CC)->get();
+  translateSetCCForBranch(DL, LHS, RHS, CCVal, DAG);
+  SDValue TargetCC = DAG.getCondCode(CCVal);
+
+  return DAG.getNode(MozartVMISD::BR_CC, DL, Op.getValueType(), Op.getOperand(0),
+                     LHS, RHS, TargetCC, Block);
+}
+
 
 SDValue MozartVMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   switch (Op->getOpcode()) {
+  case ISD::GlobalAddress:
+    return LowerGlobalAddress(Op, DAG);
   case ISD::BR_CC:
     return lowerBR_CC(Op, DAG);
   default:
