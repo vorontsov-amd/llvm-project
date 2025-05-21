@@ -5,6 +5,18 @@
 
 namespace llvm {
 
+namespace MozartVMCC {
+enum CondCode {
+  EQ,
+  NE,
+  LE,
+  GT,
+  LEU,
+  GTU,
+  INVALID,
+};
+}
+
 namespace MozartVMOp {
 enum OperandType : unsigned {
   OPERAND_SIMM16 = MCOI::OPERAND_FIRST_TARGET,
