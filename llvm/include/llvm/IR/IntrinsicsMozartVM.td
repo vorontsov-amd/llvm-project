@@ -5,5 +5,8 @@ let TargetPrefix = "mozartVM" in {  // All intrinsics start with "llvm.mozartVM.
  
  def int_mozartVM_flush: ClangBuiltin<"mozartVMFlush">,
    Intrinsic<[], [], [IntrNoMem, IntrHasSideEffects]>;
+
+ def int_mozartVM_clearwindow: ClangBuiltin<"mozartVMClearWindow">,
+   Intrinsic<[], [], [IntrNoMem, IntrHasSideEffects]>;
  
  } // TargetPrefix = "mozartVM"

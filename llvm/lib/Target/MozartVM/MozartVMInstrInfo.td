@@ -131,6 +131,10 @@ def ORI : MozartVMInst<0x07, (outs GPR:$r1), (ins GPR:$r2, simm16:$r3_imm),
 let r1 = 0, r2 = 0, r3_imm = 0 in
 def FLUSH : MozartVMInst<0x03, (outs), (ins), "FLUSH", [(int_mozartVM_flush)]>;
 
+// flush
+let r1 = 0, r2 = 0, r3_imm = 0 in
+def CLEAR : MozartVMInst<0x19, (outs), (ins), "FLUSH", [(int_mozartVM_clearwindow)]>;
+
 // putpixel
 def PUTPIXEL : MozartVMInst<0x04, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),
                       "PUTPIXEL $r1 $r2 $r3_imm", [(int_mozartVM_putpixel GPR:$r1, GPR:$r2, GPR:$r3_imm)]>;
