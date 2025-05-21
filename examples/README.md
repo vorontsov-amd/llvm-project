@@ -247,87 +247,34 @@ FF FF 40 02 	MOVli r2 -1
 ## Task 5. Add full support for graphich appication
 
 Commit id: [480c5be3070f3b408e1b291477122e5650b7a2df](https://github.com/vorontsov-amd/llvm-project/commit/480c5be3070f3b408e1b291477122e5650b7a2df)
+
 Commit id: [27119846da14ec3a56f6f2e19992a705a7089862](https://github.com/vorontsov-amd/llvm-project/commit/27119846da14ec3a56f6f2e19992a705a7089862)
 
-### Simple example of graphics application
+Commit id: [1be3df751c7148ef6bc86c44a963d59fce416c75](https://github.com/vorontsov-amd/llvm-project/commit/1be3df751c7148ef6bc86c44a963d59fce416c75)
 
-Build application:
-```
-../build/bin/clang -c -O2 graphic.c -target mozartVM
-```
+Commit id: [28e76154f5210ef5349c658947d2672f83539519](https://github.com/vorontsov-amd/llvm-project/commit/28e76154f5210ef5349c658947d2672f83539519)
 
-Generated ASM:
+Commit id: [b7bbde6b05f9c2e0f8f54570f2803ab8687449ad](https://github.com/vorontsov-amd/llvm-project/commit/b7bbde6b05f9c2e0f8f54570f2803ab8687449ad)
 
-```
-	.file	"graphic.c"
-	.text
-	.globl	app                             ; -- Begin function app
-	.type	app,@function
-app:                                    ; @app
-; %bb.0:                                ; %entry
-	MOVli r2 0
-.LBB0_1:                                ; %for.cond1.preheader
-                                        ; =>This Loop Header: Depth=1
-                                        ;     Child Loop BB0_3 Depth 2
-                                        ;       Child Loop BB0_6 Depth 3
-	MOVli r4 0
-	MOVli r9 0
-	B .LBB0_3
-.LBB0_3:                                ; %for.cond5.preheader
-                                        ;   Parent Loop BB0_1 Depth=1
-                                        ; =>  This Loop Header: Depth=2
-                                        ;       Child Loop BB0_6 Depth 3
-	MOVli r10 0
-	MOVhi r11 65280
-	B .LBB0_6
-.LBB0_6:                                ; %for.body8
-                                        ;   Parent Loop BB0_1 Depth=1
-                                        ;     Parent Loop BB0_3 Depth=2
-                                        ; =>    This Inner Loop Header: Depth=3
-	PUTPIXEL r10 r9 r11
-	INC_EQi r12 r10 1920
-	ADD r11 r11 r4
-	BR_COND r12 .LBB0_5
-	B .LBB0_6
-.LBB0_5:                                ; %for.cond.cleanup7
-                                        ;   in Loop: Header=BB0_3 Depth=2
-	INC_EQi r10 r9 1080
-	ADD r4 r4 r2
-	BR_COND r10 .LBB0_4
-	B .LBB0_3
-.LBB0_4:                                ; %for.cond.cleanup3
-                                        ;   in Loop: Header=BB0_1 Depth=1
-	INC_EQi r4 r2 1000
-	FLUSH
-	BR_COND r4 .LBB0_2
-	B .LBB0_1
-.LBB0_2:                                ; %for.cond.cleanup
-	BR r0
-.Lfunc_end0:
-	.size	app, .Lfunc_end0-app
-                                        ; -- End function
-	.ident	"clang version 20.1.4 (git@github.com:vorontsov-amd/llvm-project.git 480c5be3070f3b408e1b291477122e5650b7a2df)"
-	.section	".note.GNU-stack","",@progbits
-	.addrsig
-
-```
 
 ### Modern application from 1st semester
 
 [Original](https://github.com/vorontsov-amd/compiler_course/blob/main/task_1/src/main.cpp)
 
-[Simlified variant](./app.c)
+[Simlified variant](./graphic.c)
 
-Compile optimized llvm IR
-
-```
-../build/bin/clang -S -emit-llvm -O2 app.c -target mozartVM
-```
-
-You can see IR [here](./app.ll)
-
-Compile binary (Partially supported. Store and conditional jump currently unssupported, but soon to be)
+Gerenate ASM
 
 ```
-../build/bin/clang -c -O2 app.c -target mozartVM
+../build/bin/clang++ -S -O0 graphic.c -target mozartVM
+```
+
+Click to see ASM [here](./graphic.s)
+
+Click to see IR [here](./graphic.ll)
+
+Compile binary
+
+```
+../build/bin/clang++ -c -O0 graphic.c -target mozartVM
 ```
