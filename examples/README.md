@@ -283,7 +283,7 @@ Compile binary
 
 ## Task 6. Simulator
 
-Clone repository
+Clone [repository](https://github.com/vorontsov-amd/simlinx/tree/llvm-course)
 
 ```
 git clone https://github.com/vorontsov-amd/simlinx
