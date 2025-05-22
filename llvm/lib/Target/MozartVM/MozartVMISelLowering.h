@@ -62,11 +62,6 @@ private:
                       const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,
                       SelectionDAG &DAG) const override;
 
-  SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerCALL_SETUP(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerCALL_ALLOC(SDValue Op, SelectionDAG &DAG) const;
-
   bool CanLowerReturn(CallingConv::ID CallConv, MachineFunction &MF,
                       bool IsVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &ArgsFlags,

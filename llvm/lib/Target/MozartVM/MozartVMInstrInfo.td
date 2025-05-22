@@ -12,25 +12,6 @@ def mozartVM_brcc     : SDNode<"MozartVMISD::BR_CC", SDT_MozartVMBrCC,
 def mozartVM_ret      : SDNode<"MozartVMISD::RET", SDTNone,
                             [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 
-
-def SDT_MozartVMCallSetup : SDTypeProfile<0, 1, [ 
-    SDTCisVT<0, i32> 
-]>;
-
-def mozartVM_call_setup : SDNode<"MozartVMISD::CALL_SETUP", SDT_MozartVMCallSetup,
-                               [SDNPHasChain, SDNPOptInGlue]>;
-
-def SDT_MozartVMCallAlloc : SDTypeProfile<1, 2, [
-    SDTCisVT<0, i32>, 
-    SDTCisVT<1, i32>, 
-    SDTCisVT<2, i32>  
-]>;
-
-def mozartVM_call_alloc : SDNode<"MozartVMISD::CALL_ALLOC", SDT_MozartVMCallAlloc,
-                               [SDNPHasChain]>;
-
-def SrcValue : SDNode<"MozartVMISD::SRC_VALUE", SDTIntUnaryOp>;
-
 //===----------------------------------------------------------------------===//
 // Instruction format superclass
 //===----------------------------------------------------------------------===//
@@ -75,20 +56,14 @@ def btarget16 : Operand<OtherVT> {
   let OperandType = "OPERAND_PCREL";
 }
 
-def HI16 : SDNodeXForm<imm, [{
-  if (const auto *GA = dyn_cast<GlobalAddressSDNode>(N)) {
-    uint64_t Val = GA->getOffset();
-    return CurDAG->getTargetConstant((Val >> 16) & 0xFFFF, SDLoc(N), MVT::i32);
-  }
-  return CurDAG->getTargetConstant((N->getZExtValue() >> 16) & 0xFFFF, SDLoc(N), MVT::i32);
+def LI16 : SDNodeXForm<imm, [{
+  return CurDAG->getTargetConstant((uint64_t)N->getZExtValue() & 0xffff,
+                                  SDLoc(N), MVT::i32);
 }]>;
 
-def LI16 : SDNodeXForm<imm, [{
-  if (const auto *GA = dyn_cast<GlobalAddressSDNode>(N)) {
-    uint64_t Val = GA->getOffset();
-    return CurDAG->getTargetConstant(Val & 0xFFFF, SDLoc(N), MVT::i32);
-  }
-  return CurDAG->getTargetConstant(N->getZExtValue() & 0xFFFF, SDLoc(N), MVT::i32);
+def HI16 : SDNodeXForm<imm, [{
+  return CurDAG->getTargetConstant((uint64_t)N->getZExtValue() >> 16, SDLoc(N),
+                                  MVT::i32);
 }]>;
 
 //===----------------------------------------------------------------------===//
@@ -158,7 +133,7 @@ def FLUSH : MozartVMInst<0x03, (outs), (ins), "FLUSH", [(int_mozartVM_flush)]>;
 
 // flush
 let r1 = 0, r2 = 0, r3_imm = 0 in
-def CLEAR : MozartVMInst<0x19, (outs), (ins), "FLUSH", [(int_mozartVM_clearwindow)]>;
+def CLEAR : MozartVMInst<0x19, (outs), (ins), "CLEAR", [(int_mozartVM_clearwindow)]>;
 
 // putpixel
 def PUTPIXEL : MozartVMInst<0x04, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),
@@ -243,10 +218,3 @@ def i32hi16 : Operand<i32>, PatLeaf<(i32 imm), [{
 // i32 imm
 def : Pat<(i32 imm:$r3_imm), (ORI (MOVHI (HI16 imm:$r3_imm)), (LI16 imm:$r3_imm))>;
 def : Pat<(i32 i32hi16:$r3_imm), (MOVHI i32hi16:$r3_imm)>;
-
-def : Pat<(i32 (globaladdr:$sym)),
-          (ORI (MOVHI (HI16 (i32 (tglobaladdr:$sym)))), 
-               (MOVLI (LI16 (i32 (tglobaladdr:$sym)))))>;
-
-def : Pat<(add GPR:$r2, simm16:$offset), (ADDI GPR:$r2, simm16:$offset)>;
-

@@ -59,7 +59,7 @@ MozartVMTargetLowering::MozartVMTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::UNDEF, MVT::i32, Legal);
 
   setOperationAction(ISD::BR_CC, MVT::i32, Custom);
-  setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
+
   setOperationAction(ISD::FRAMEADDR, MVT::i32, Legal);
 
   setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
@@ -689,70 +689,7 @@ SDValue MozartVMTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) co
     return LowerGlobalAddress(Op, DAG);
   case ISD::BR_CC:
     return lowerBR_CC(Op, DAG);
-  case ISD::GlobalAddress:
-    return LowerGlobalAddress(Op, DAG);
-  case MozartVMISD::CALL_SETUP:
-    return LowerCALL_SETUP(Op, DAG);
-  case MozartVMISD::CALL_ALLOC:
-    return LowerCALL_ALLOC(Op, DAG);
-  case ISD::LOAD: {
-    if (Op.getOperand(1).getOpcode() == MozartVMISD::SRC_VALUE) {
-      return LowerSRC_VALUE(Op, DAG);
-    }
-    break;
   default:
     llvm_unreachable("");
   }
-}
-
-SDValue MozartVMTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
-  SDLoc DL(Op);
-  const GlobalAddressSDNode *GA = cast<GlobalAddressSDNode>(Op);
-  
-  // Create TargetGlobalAddress
-  SDValue TargetAddr = DAG.getTargetGlobalAddress(
-      GA->getGlobal(), DL, MVT::i32, GA->getOffset()
-  );
-  
-  // Directly use HI16/LI16 transformations
-  SDValue Hi = DAG.getNode(MozartVMISD::HI, DL, MVT::i32, TargetAddr);
-  SDValue Lo = DAG.getNode(MozartVMISD::LO, DL, MVT::i32, TargetAddr);
-  
-  // Combine using ORI instead of generic OR
-  return DAG.getNode(MozartVM::ORI, DL, MVT::i32, Hi, Lo);
-}
-
-SDValue MozartVMTargetLowering::LowerCALL_SETUP(SDValue Op, SelectionDAG &DAG) const {
-  SDLoc DL(Op);
-  SDValue Addr = Op.getOperand(0);
-  
-  // Генерируем последовательность для настройки вызова
-  SDValue MOVHI = DAG.getNode(MozartVMISD::HI, DL, MVT::i32, Addr);
-  SDValue MOVLI = DAG.getNode(MozartVMISD::LO, DL, MVT::i32, Addr);
-  
-  return DAG.getNode(ISD::OR, DL, MVT::i32, MOVHI, MOVLI);
-}
-
-SDValue MozartVMTargetLowering::LowerCALL_ALLOC(SDValue Op, SelectionDAG &DAG) const {
-  SDLoc DL(Op);
-  SDValue Addr1 = Op.getOperand(0);
-  SDValue Addr2 = Op.getOperand(1);
-
-  // Разбиваем оба адреса на HI/LO
-  SDValue Hi1 = DAG.getNode(MozartVMISD::HI, DL, MVT::i32, Addr1);
-  SDValue Lo1 = DAG.getNode(MozartVMISD::LO, DL, MVT::i32, Addr1);
-  SDValue FullAddr1 = DAG.getNode(ISD::OR, DL, MVT::i32, Hi1, Lo1);
-
-  SDValue Hi2 = DAG.getNode(MozartVMISD::HI, DL, MVT::i32, Addr2);
-  SDValue Lo2 = DAG.getNode(MozartVMISD::LO, DL, MVT::i32, Addr2);
-  SDValue FullAddr2 = DAG.getNode(ISD::OR, DL, MVT::i32, Hi2, Lo2);
-
-  // Возвращаем комбинацию адресов
-  return DAG.getNode(ISD::ADD, DL, MVT::i32, FullAddr1, FullAddr2);
-}
-
-SDValue MozartVMTargetLowering::LowerSRC_VALUE(SDValue Op, SelectionDAG &DAG) const {
-  SDLoc DL(Op);
-  SDValue Val = Op.getOperand(0);
-  return DAG.getNode(MozartVMISD::SRC_VALUE, DL, MVT::i32, Val);
 }
