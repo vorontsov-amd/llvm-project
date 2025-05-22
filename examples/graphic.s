@@ -6,9 +6,9 @@ main:                                   ; @main
 ; %bb.0:                                ; %entry
 	MOVli r2 0
 	STORE r2 r1 104
-	MOVli r4 1920
+	MOVli r4 1280
 	STORE r4 r1 100
-	MOVli r4 1080
+	MOVli r4 720
 	STORE r4 r1 96
 	MOVli r4 500
 	STORE r4 r1 92
@@ -40,7 +40,7 @@ main:                                   ; @main
 	STORE r4 r1 40
 	STORE r2 r1 36
 	STORE r2 r1 32
-	MOVli r4 600
+	MOVli r4 200
 	STORE r4 r1 28
 	STORE r4 r1 24
 	MOVli r4 5
@@ -62,7 +62,7 @@ main:                                   ; @main
 	LOAD r2 r1 28
 	MOVli r4 500
 	ADD r4 r2 r4
-	MOVli r2 1920
+	MOVli r2 1280
 	B.GT r2 r4 .LBB0_11
 	B .LBB0_3
 .LBB0_3:                                ; %if.then
@@ -80,12 +80,12 @@ main:                                   ; @main
 .LBB0_5:                                ; %if.end
                                         ;   in Loop: Header=BB0_1 Depth=1
 	LOAD r4 r1 28
-	MOVli r2 1420
+	MOVli r2 780
 	B.GT r2 r4 .LBB0_7
 	B .LBB0_6
 .LBB0_6:                                ; %if.then13
                                         ;   in Loop: Header=BB0_1 Depth=1
-	MOVli r2 1419
+	MOVli r2 779
 	STORE r2 r1 28
 	B .LBB0_7
 .LBB0_7:                                ; %if.end14
@@ -134,7 +134,7 @@ main:                                   ; @main
 	LOAD r2 r1 24
 	MOVli r4 299
 	ADD r4 r2 r4
-	MOVli r2 1080
+	MOVli r2 720
 	B.GT r2 r4 .LBB0_21
 	B .LBB0_13
 .LBB0_13:                               ; %if.then26
@@ -152,12 +152,12 @@ main:                                   ; @main
 .LBB0_15:                               ; %if.end29
                                         ;   in Loop: Header=BB0_1 Depth=1
 	LOAD r4 r1 24
-	MOVli r2 781
+	MOVli r2 421
 	B.GT r2 r4 .LBB0_17
 	B .LBB0_16
 .LBB0_16:                               ; %if.then31
                                         ;   in Loop: Header=BB0_1 Depth=1
-	MOVli r2 780
+	MOVli r2 420
 	STORE r2 r1 24
 	B .LBB0_17
 .LBB0_17:                               ; %if.end32
@@ -197,7 +197,7 @@ main:                                   ; @main
 	B .LBB0_21
 .LBB0_21:                               ; %if.end41
                                         ;   in Loop: Header=BB0_1 Depth=1
-	FLUSH
+	CLEAR
 	MOVli r2 0
 	STORE r2 r1 4
 	B .LBB0_22
@@ -269,6 +269,6 @@ main:                                   ; @main
 .Lfunc_end0:
 	.size	main, .Lfunc_end0-main
                                         ; -- End function
-	.ident	"clang version 20.1.4 (git@github.com:vorontsov-amd/llvm-project.git 1be3df751c7148ef6bc86c44a963d59fce416c75)"
+	.ident	"clang version 20.1.4 (git@github.com:vorontsov-amd/llvm-project.git 28e76154f5210ef5349c658947d2672f83539519)"
 	.section	".note.GNU-stack","",@progbits
 	.addrsig

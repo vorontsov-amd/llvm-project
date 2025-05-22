@@ -262,7 +262,7 @@ attributes #1 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 1}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.4 (git@github.com:vorontsov-amd/llvm-project.git 1be3df751c7148ef6bc86c44a963d59fce416c75)"}
+!2 = !{!"clang version 20.1.4 (git@github.com:vorontsov-amd/llvm-project.git 28e76154f5210ef5349c658947d2672f83539519)"}
 !3 = distinct !{!3, !4}
 !4 = !{!"llvm.loop.mustprogress"}
 !5 = distinct !{!5, !4}
