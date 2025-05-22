@@ -27,8 +27,8 @@ entry:
   %i = alloca i32, align 4
   %j = alloca i32, align 4
   store i32 0, ptr %retval, align 4
-  store i32 1920, ptr %window_width, align 4
-  store i32 1080, ptr %window_height, align 4
+  store i32 1280, ptr %window_width, align 4
+  store i32 720, ptr %window_height, align 4
   store i32 500, ptr %image_width, align 4
   store i32 299, ptr %image_height, align 4
   store i32 1, ptr %dy, align 4
@@ -55,8 +55,8 @@ entry:
   store i32 %0, ptr %image_color, align 4
   store i32 0, ptr %current_color, align 4
   store i32 0, ptr %next_color, align 4
-  store i32 600, ptr %image_x, align 4
-  store i32 600, ptr %image_y, align 4
+  store i32 200, ptr %image_x, align 4
+  store i32 200, ptr %image_y, align 4
   store i32 5, ptr %speed_x, align 4
   store i32 5, ptr %speed_y, align 4
   store i32 0, ptr %x, align 4
@@ -71,7 +71,7 @@ while.body:                                       ; preds = %entry, %for.end50
 lor.lhs.false:                                    ; preds = %while.body
   %2 = load i32, ptr %image_x, align 4
   %add = add nsw i32 %2, 500
-  %cmp9 = icmp sge i32 %add, 1920
+  %cmp9 = icmp sge i32 %add, 1280
   br i1 %cmp9, label %if.then, label %if.end21
 
 if.then:                                          ; preds = %lor.lhs.false, %while.body
@@ -85,11 +85,11 @@ if.then11:                                        ; preds = %if.then
 
 if.end:                                           ; preds = %if.then11, %if.then
   %4 = load i32, ptr %image_x, align 4
-  %cmp12 = icmp sgt i32 %4, 1419
+  %cmp12 = icmp sgt i32 %4, 779
   br i1 %cmp12, label %if.then13, label %if.end14
 
 if.then13:                                        ; preds = %if.end
-  store i32 1419, ptr %image_x, align 4
+  store i32 779, ptr %image_x, align 4
   br label %if.end14
 
 if.end14:                                         ; preds = %if.then13, %if.end
@@ -130,7 +130,7 @@ if.end21:                                         ; preds = %if.end19, %lor.lhs.
 lor.lhs.false23:                                  ; preds = %if.end21
   %13 = load i32, ptr %image_y, align 4
   %add24 = add nsw i32 %13, 299
-  %cmp25 = icmp sge i32 %add24, 1080
+  %cmp25 = icmp sge i32 %add24, 720
   br i1 %cmp25, label %if.then26, label %if.end41
 
 if.then26:                                        ; preds = %lor.lhs.false23, %if.end21
@@ -144,11 +144,11 @@ if.then28:                                        ; preds = %if.then26
 
 if.end29:                                         ; preds = %if.then28, %if.then26
   %15 = load i32, ptr %image_y, align 4
-  %cmp30 = icmp sgt i32 %15, 780
+  %cmp30 = icmp sgt i32 %15, 420
   br i1 %cmp30, label %if.then31, label %if.end32
 
 if.then31:                                        ; preds = %if.end29
-  store i32 780, ptr %image_y, align 4
+  store i32 420, ptr %image_y, align 4
   br label %if.end32
 
 if.end32:                                         ; preds = %if.then31, %if.end29
@@ -262,7 +262,7 @@ attributes #1 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 1}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.4 (git@github.com:vorontsov-amd/llvm-project.git 28e76154f5210ef5349c658947d2672f83539519)"}
+!2 = !{!"clang version 20.1.4 (git@github.com:vorontsov-amd/llvm-project.git 10ae2e059d307bce01533be8eb8897bd9986f74a)"}
 !3 = distinct !{!3, !4}
 !4 = !{!"llvm.loop.mustprogress"}
 !5 = distinct !{!5, !4}

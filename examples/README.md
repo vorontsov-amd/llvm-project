@@ -256,6 +256,8 @@ Commit id: [28e76154f5210ef5349c658947d2672f83539519](https://github.com/voronts
 
 Commit id: [b7bbde6b05f9c2e0f8f54570f2803ab8687449ad](https://github.com/vorontsov-amd/llvm-project/commit/b7bbde6b05f9c2e0f8f54570f2803ab8687449ad)
 
+Commit id: [440bca067ba3c02092ce50b6682d452888bf8507](https://github.com/vorontsov-amd/llvm-project/commit/440bca067ba3c02092ce50b6682d452888bf8507)
+
 
 ### Modern application from 1st semester
 
@@ -277,4 +279,32 @@ Compile binary
 
 ```
 ../build/bin/clang++ -c -O0 graphic.c -target mozartVM
+```
+
+## Task 6. Simulator
+
+Clone repository
+
+```
+git clone https://github.com/vorontsov-amd/simlinx
+cd simlinx
+git switch llvm-course
+```
+
+Build
+```
+python3 -m venv .venv
+source .venv/bin/activate
+
+pip install -r requirements.txt
+pip install -e .
+
+cmake -B build
+cmake --build build
+```
+
+Run graphic application
+
+```
+./build/bin/simlinx ./examples/graphic.o
 ```
