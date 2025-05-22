@@ -133,7 +133,7 @@ def FLUSH : MozartVMInst<0x03, (outs), (ins), "FLUSH", [(int_mozartVM_flush)]>;
 
 // flush
 let r1 = 0, r2 = 0, r3_imm = 0 in
-def CLEAR : MozartVMInst<0x19, (outs), (ins), "FLUSH", [(int_mozartVM_clearwindow)]>;
+def CLEAR : MozartVMInst<0x19, (outs), (ins), "CLEAR", [(int_mozartVM_clearwindow)]>;
 
 // putpixel
 def PUTPIXEL : MozartVMInst<0x04, (outs), (ins GPR:$r1, GPR:$r2, GPR:$r3_imm),

@@ -21,8 +21,8 @@
 
 int main() {
 
-    constexpr int window_width = 1920;
-    constexpr int window_height = 1080;
+    constexpr int window_width = 1280;
+    constexpr int window_height = 720;
     constexpr int image_width = 500;
     constexpr int image_height = 299;
    
@@ -46,8 +46,8 @@ int main() {
     int next_color = 0;
 
 
-    int image_x = 600;
-    int image_y = 600;
+    int image_x = 200;
+    int image_y = 200;
     int speed_x = 5;
     int speed_y = 5;
 
